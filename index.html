@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COSMOS — Space Image Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep:    #020818;
+      --bg-card:    #0a1628;
+      --bg-input:   #0d1f3c;
+      --border:     rgba(100, 160, 255, 0.18);
+      --accent:     #4a90e8;
+      --accent-glow:#1e6fd9;
+      --text-main:  #e8f0fe;
+      --text-muted: #7a9cc4;
+      --white:      #ffffff;
+      --star-color: rgba(255,255,255,0.7);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Starfield ── */
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Layout ── */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 48px 0 32px;
+    }
+    header .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      background: linear-gradient(135deg, #a8d0ff 0%, #4a90e8 40%, #b0c8ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 0 28px rgba(74,144,232,0.5));
+    }
+    header .tagline {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* ── Chat container ── */
+    #chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-bottom: 20px;
+    }
+
+    .message {
+      display: flex;
+      gap: 14px;
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user  { justify-content: flex-end; }
+    .message.bot   { justify-content: flex-start; }
+
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+    }
+    .avatar.bot-av {
+      background: linear-gradient(135deg, #1a3a6e, #2a5cbf);
+      border: 1px solid var(--border);
+      color: #a8d0ff;
+    }
+    .avatar.user-av {
+      background: linear-gradient(135deg, #0e2a52, #1a4a8a);
+      border: 1px solid var(--border);
+      color: #c8deff;
+    }
+
+    .bubble {
+      max-width: 680px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      line-height: 1.6;
+      font-size: 0.92rem;
+    }
+    .message.user .bubble {
+      background: linear-gradient(135deg, #0d2550, #1a3d75);
+      border: 1px solid rgba(74,144,232,0.3);
+      border-radius: 16px 4px 16px 16px;
+      color: #d4e8ff;
+    }
+    .message.bot .bubble {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px 16px 16px 16px;
+      color: var(--text-main);
+    }
+
+    /* ── Image card ── */
+    .image-card {
+      margin-top: 12px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(74,144,232,0.25);
+      background: var(--bg-input);
+      position: relative;
+    }
+    .image-card img {
+      width: 100%;
+      max-width: 560px;
+      display: block;
+      border-radius: 12px 12px 0 0;
+    }
+    .image-meta {
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
+      background: rgba(10,22,40,0.8);
+    }
+    .image-actions {
+      padding: 8px 14px 12px;
+      display: flex;
+      gap: 10px;
+    }
+    .btn-small {
+      font-size: 0.78rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-small:hover {
+      background: rgba(74,144,232,0.15);
+      border-color: var(--accent);
+    }
+
+    /* ── Typing indicator ── */
+    .typing-bubble {
+      display: flex; align-items: center; gap: 6px;
+      padding: 12px 16px;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+      30%            { transform: translateY(-7px); opacity: 1; }
+    }
+
+    /* ── Input bar ── */
+    .input-wrapper {
+      position: sticky;
+      bottom: 0;
+      background: linear-gradient(to top, var(--bg-deep) 70%, transparent);
+      padding: 24px 0 10px;
+    }
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 10px 14px;
+      transition: border-color 0.2s;
+    }
+    .input-row:focus-within {
+      border-color: rgba(74,144,232,0.5);
+      box-shadow: 0 0 20px rgba(74,144,232,0.1);
+    }
+    #prompt-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.93rem;
+      resize: none;
+      max-height: 120px;
+      line-height: 1.5;
+      padding: 4px 0;
+    }
+    #prompt-input::placeholder { color: var(--text-muted); }
+
+    #send-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+      color: white;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 12px rgba(74,144,232,0.4);
+    }
+    #send-btn:hover:not(:disabled) {
+      transform: scale(1.08);
+      box-shadow: 0 4px 18px rgba(74,144,232,0.6);
+    }
+    #send-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    #send-btn svg { width: 18px; height: 18px; fill: white; }
+
+    .hint {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Welcome card ── */
+    .welcome {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .welcome h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      color: #a8d0ff;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+    .welcome p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.7; }
+    .suggestions {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .suggestion-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .suggestion-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(74,144,232,0.08);
+    }
+
+    /* ── Error ── */
+    .error-bubble {
+      background: rgba(220, 60, 60, 0.1);
+      border: 1px solid rgba(220, 60, 60, 0.3);
+      color: #ffaaaa;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(74,144,232,0.3); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div class="app">
+  <header>
+    <div class="logo">COSMOS</div>
+    <div class="tagline">Space Image Generator &nbsp;·&nbsp; Powered by AI</div>
+  </header>
+
+  <div id="chat-container">
+    <div class="welcome" id="welcome-card">
+      <h2>✦ EXPLORE THE UNIVERSE ✦</h2>
+      <p>Describe any cosmic scene — nebulae, galaxies, black holes, planets, star clusters — and I'll paint it for you.</p>
+      <div class="suggestions">
+        <button class="suggestion-btn" onclick="useSuggestion(this)">🌌 Andromeda galaxy at dawn</button>
+        <button class="suggestion-btn" onclick="useSuggestion(this)">🪐 Saturn with aurora rings</button>
+        <button class="suggestion-btn" onclick="useSuggestion(this)">⭐ Nebula birthing new stars</button>
+        <button class="suggestion-btn" onclick="useSuggestion(this)">🕳️ Black hole event horizon</button>
+        <button class="suggestion-btn" onclick="useSuggestion(this)">☄️ Comet passing through deep space</button>
+        <button class="suggestion-btn" onclick="useSuggestion(this)">🌠 Milky Way over alien ocean</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-wrapper">
+    <div class="input-row">
+      <textarea id="prompt-input" placeholder="Describe a space scene… e.g. 'a glowing nebula with twin suns'" rows="1"></textarea>
+      <button id="send-btn" onclick="sendMessage()" title="Generate">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="hint">Press Enter to send &nbsp;·&nbsp; Shift+Enter for new line</div>
+  </div>
+</div>
+
+<script>
+  // ── Starfield ──
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function initStars() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    stars = Array.from({ length: 200 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + 0.2,
+      a: Math.random(),
+      da: (Math.random() - 0.5) * 0.005
+    }));
+  }
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.a = Math.max(0.1, Math.min(1, s.a + s.da));
+      if (s.a <= 0.1 || s.a >= 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+  window.addEventListener('resize', initStars);
+  initStars(); drawStars();
+
+  // ── Auto-resize textarea ──
+  const input = document.getElementById('prompt-input');
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  // ── Chat state ──
+  let history = [];
+  let isLoading = false;
+
+  function useSuggestion(btn) {
+    input.value = btn.textContent.slice(2).trim();
+    input.dispatchEvent(new Event('input'));
+    sendMessage();
+  }
+
+  function addMessage(role, content, imageUrl, imagePrompt) {
+    const welcome = document.getElementById('welcome-card');
+    if (welcome) welcome.remove();
+
+    const container = document.getElementById('chat-container');
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+
+    const avatar = document.createElement('div');
+    avatar.className = `avatar ${role === 'bot' ? 'bot-av' : 'user-av'}`;
+    avatar.textContent = role === 'bot' ? 'AI' : 'YOU';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = content;
+
+    if (imageUrl) {
+      const card = document.createElement('div');
+      card.className = 'image-card';
+
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.alt = imagePrompt || 'Generated space image';
+      img.loading = 'lazy';
+      img.onerror = () => { img.src = ''; img.style.display='none'; };
+
+      const meta = document.createElement('div');
+      meta.className = 'image-meta';
+      meta.textContent = `✦ ${imagePrompt || 'Space image'}`;
+
+      const actions = document.createElement('div');
+      actions.className = 'image-actions';
+
+      const dlBtn = document.createElement('button');
+      dlBtn.className = 'btn-small';
+      dlBtn.textContent = '↓ Download';
+      dlBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = imageUrl; a.download = 'cosmos.jpg';
+        a.target = '_blank'; a.click();
+      };
+
+      const newBtn = document.createElement('button');
+      newBtn.className = 'btn-small';
+      newBtn.textContent = '↺ Regenerate';
+      newBtn.onclick = () => { input.value = imagePrompt || ''; sendMessage(); };
+
+      actions.appendChild(dlBtn);
+      actions.appendChild(newBtn);
+      card.appendChild(img);
+      card.appendChild(meta);
+      card.appendChild(actions);
+      bubble.appendChild(card);
+    }
+
+    if (role === 'bot') {
+      div.appendChild(avatar);
+      div.appendChild(bubble);
+    } else {
+      div.appendChild(bubble);
+      div.appendChild(avatar);
+    }
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function addTyping() {
+    const container = document.getElementById('chat-container');
+    const div = document.createElement('div');
+    div.className = 'message bot';
+    div.id = 'typing-indicator';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar bot-av';
+    avatar.textContent = 'AI';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble typing-bubble';
+    bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) t.remove();
+  }
+
+  function addError(msg) {
+    const container = document.getElementById('chat-container');
+    const div = document.createElement('div');
+    div.className = 'message bot';
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar bot-av';
+    avatar.textContent = 'AI';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = `<div class="error-bubble">⚠️ ${msg}</div>`;
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text || isLoading) return;
+
+    isLoading = true;
+    document.getElementById('send-btn').disabled = true;
+    addMessage('user', text);
+    input.value = '';
+    input.style.height = 'auto';
+
+    history.push({ role: 'user', content: text });
+    addTyping();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history })
+      });
+
+      const data = await res.json();
+      removeTyping();
+
+      if (!res.ok) throw new Error(data.error || 'Server error');
+
+      addMessage('bot', data.text, data.imageUrl, data.imagePrompt);
+      history.push({ role: 'assistant', content: data.text });
+    } catch (err) {
+      removeTyping();
+      addError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      isLoading = false;
+      document.getElementById('send-btn').disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
