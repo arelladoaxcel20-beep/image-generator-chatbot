@@ -1,7 +1,7 @@
 // api/chat.js — Vercel Serverless Function
 // Env vars needed in Vercel dashboard:
-//   GROQ_API_KEY   — your Groq key
-//   (Pollinations is free, no key needed)
+//   GROQ_API_KEY          — your Groq key
+//   POLLINATIONS_API_KEY  — your Pollinations key (optional, improves quality/limits)
 
 export const config = { runtime: 'edge' };
 
@@ -73,7 +73,7 @@ export default async function handler(req) {
         'Authorization': `Bearer ${groqKey}`
       },
       body: JSON.stringify({
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         messages,
         max_tokens: 512,
         temperature: 0.85
@@ -107,10 +107,12 @@ export default async function handler(req) {
     displayText = rawText.replace(/IMAGE_PROMPT:.*/is, '').trim();
 
     // ── Build Pollinations URL ──
-    // Free, no API key needed. Uses their image generation endpoint.
+    const pollinationsKey = process.env.POLLINATIONS_API_KEY;
     const encodedPrompt = encodeURIComponent(imagePrompt);
     const seed = Math.floor(Math.random() * 999999);
-    imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=768&height=512&seed=${seed}&nologo=true&model=flux`;
+    // If a Pollinations API key is set, pass it as token param for higher limits & priority
+    const keyParam = pollinationsKey ? `&token=${encodeURIComponent(pollinationsKey)}` : '';
+    imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=768&height=512&seed=${seed}&nologo=true&model=flux${keyParam}`;
   }
 
   return new Response(
