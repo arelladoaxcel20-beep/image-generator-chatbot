@@ -12,310 +12,141 @@
       --bg-deep:    #020818;
       --bg-card:    #0a1628;
       --bg-input:   #0d1f3c;
-      --border:     rgba(100, 160, 255, 0.18);
+      --border:     rgba(100,160,255,0.18);
       --accent:     #4a90e8;
       --accent-glow:#1e6fd9;
       --text-main:  #e8f0fe;
       --text-muted: #7a9cc4;
-      --white:      #ffffff;
-      --star-color: rgba(255,255,255,0.7);
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-deep);
-      color: var(--text-main);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text-main);min-height:100vh;overflow-x:hidden;}
 
     /* ── Starfield ── */
-    #stars-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
+    #stars-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 
-    /* ── Layout ── */
-    .app {
-      position: relative;
-      z-index: 1;
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 0 20px 60px;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    /* ── App shell ── */
+    .app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 20px 60px;display:flex;flex-direction:column;min-height:100vh;}
 
     /* ── Header ── */
-    header {
-      text-align: center;
-      padding: 48px 0 32px;
-    }
-    header .logo {
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2rem, 6vw, 3.8rem);
-      font-weight: 900;
-      letter-spacing: 0.15em;
-      background: linear-gradient(135deg, #a8d0ff 0%, #4a90e8 40%, #b0c8ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: none;
-      filter: drop-shadow(0 0 28px rgba(74,144,232,0.5));
-    }
-    header .tagline {
-      margin-top: 10px;
-      font-size: 0.85rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
+    header{text-align:center;padding:40px 0 24px;}
+    .logo{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,6vw,3.6rem);font-weight:900;letter-spacing:0.15em;background:linear-gradient(135deg,#a8d0ff 0%,#4a90e8 40%,#b0c8ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 28px rgba(74,144,232,0.5));}
+    .tagline{margin-top:8px;font-size:0.8rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-muted);}
 
-    /* ── Chat container ── */
-    #chat-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      padding-bottom: 20px;
-    }
+    /* ── Tabs ── */
+    .tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;background:var(--bg-card);}
+    .tab-btn{flex:1;padding:12px 0;background:transparent;border:none;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text-muted);transition:all 0.25s;position:relative;}
+    .tab-btn.active{color:#a8d0ff;background:linear-gradient(135deg,rgba(30,111,217,0.25),rgba(74,144,232,0.15));}
+    .tab-btn.active::after{content:'';position:absolute;bottom:0;left:20%;width:60%;height:2px;background:var(--accent);border-radius:2px;}
+    .tab-btn:hover:not(.active){color:var(--text-main);background:rgba(74,144,232,0.06);}
 
-    .message {
-      display: flex;
-      gap: 14px;
-      animation: fadeUp 0.4s ease both;
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    /* ── Panels ── */
+    .panel{display:none;flex-direction:column;}
+    .panel.active{display:flex;}
 
-    .message.user  { justify-content: flex-end; }
-    .message.bot   { justify-content: flex-start; }
+    /* ══════════════════════════════
+       CHAT PANEL
+    ══════════════════════════════ */
+    #chat-container{flex:1;display:flex;flex-direction:column;gap:20px;padding-bottom:12px;min-height:360px;max-height:58vh;overflow-y:auto;}
+    .message{display:flex;gap:14px;animation:fadeUp 0.4s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    .message.user{justify-content:flex-end;}
+    .message.bot{justify-content:flex-start;}
+    .avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:'Orbitron',sans-serif;font-weight:700;}
+    .avatar.bot-av{background:linear-gradient(135deg,#1a3a6e,#2a5cbf);border:1px solid var(--border);color:#a8d0ff;}
+    .avatar.user-av{background:linear-gradient(135deg,#0e2a52,#1a4a8a);border:1px solid var(--border);color:#c8deff;}
+    .bubble{max-width:660px;padding:13px 17px;border-radius:16px;line-height:1.65;font-size:0.91rem;}
+    .message.user .bubble{background:linear-gradient(135deg,#0d2550,#1a3d75);border:1px solid rgba(74,144,232,0.3);border-radius:16px 4px 16px 16px;color:#d4e8ff;}
+    .message.bot .bubble{background:var(--bg-card);border:1px solid var(--border);border-radius:4px 16px 16px 16px;}
 
-    .avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-    }
-    .avatar.bot-av {
-      background: linear-gradient(135deg, #1a3a6e, #2a5cbf);
-      border: 1px solid var(--border);
-      color: #a8d0ff;
-    }
-    .avatar.user-av {
-      background: linear-gradient(135deg, #0e2a52, #1a4a8a);
-      border: 1px solid var(--border);
-      color: #c8deff;
-    }
+    /* ── Image card (shared) ── */
+    .image-card{margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid rgba(74,144,232,0.22);background:var(--bg-input);}
+    .image-card img{width:100%;max-width:580px;display:block;}
+    .image-card img.loading-img{min-height:200px;object-fit:cover;}
+    .image-meta{padding:9px 14px;font-size:0.76rem;color:var(--text-muted);font-style:italic;}
+    .image-actions{padding:6px 14px 12px;display:flex;gap:10px;flex-wrap:wrap;}
+    .btn-small{font-size:0.78rem;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--accent);cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif;}
+    .btn-small:hover{background:rgba(74,144,232,0.15);border-color:var(--accent);}
 
-    .bubble {
-      max-width: 680px;
-      padding: 14px 18px;
-      border-radius: 16px;
-      line-height: 1.6;
-      font-size: 0.92rem;
-    }
-    .message.user .bubble {
-      background: linear-gradient(135deg, #0d2550, #1a3d75);
-      border: 1px solid rgba(74,144,232,0.3);
-      border-radius: 16px 4px 16px 16px;
-      color: #d4e8ff;
-    }
-    .message.bot .bubble {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 4px 16px 16px 16px;
-      color: var(--text-main);
-    }
+    /* ── Typing dots ── */
+    .typing-bubble{display:flex;align-items:center;gap:6px;padding:12px 16px;}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:bounce 1.2s infinite ease-in-out;}
+    .dot:nth-child(2){animation-delay:0.2s;}.dot:nth-child(3){animation-delay:0.4s;}
+    @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:0.6;}30%{transform:translateY(-7px);opacity:1;}}
 
-    /* ── Image card ── */
-    .image-card {
-      margin-top: 12px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(74,144,232,0.25);
-      background: var(--bg-input);
-      position: relative;
-    }
-    .image-card img {
-      width: 100%;
-      max-width: 560px;
-      display: block;
-      border-radius: 12px 12px 0 0;
-    }
-    .image-meta {
-      padding: 10px 14px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      font-style: italic;
-      background: rgba(10,22,40,0.8);
-    }
-    .image-actions {
-      padding: 8px 14px 12px;
-      display: flex;
-      gap: 10px;
-    }
-    .btn-small {
-      font-size: 0.78rem;
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--accent);
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'Inter', sans-serif;
-    }
-    .btn-small:hover {
-      background: rgba(74,144,232,0.15);
-      border-color: var(--accent);
-    }
-
-    /* ── Typing indicator ── */
-    .typing-bubble {
-      display: flex; align-items: center; gap: 6px;
-      padding: 12px 16px;
-    }
-    .dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: bounce 1.2s infinite ease-in-out;
-    }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
-      30%            { transform: translateY(-7px); opacity: 1; }
-    }
-
-    /* ── Input bar ── */
-    .input-wrapper {
-      position: sticky;
-      bottom: 0;
-      background: linear-gradient(to top, var(--bg-deep) 70%, transparent);
-      padding: 24px 0 10px;
-    }
-    .input-row {
-      display: flex;
-      gap: 12px;
-      align-items: flex-end;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 10px 14px;
-      transition: border-color 0.2s;
-    }
-    .input-row:focus-within {
-      border-color: rgba(74,144,232,0.5);
-      box-shadow: 0 0 20px rgba(74,144,232,0.1);
-    }
-    #prompt-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text-main);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.93rem;
-      resize: none;
-      max-height: 120px;
-      line-height: 1.5;
-      padding: 4px 0;
-    }
-    #prompt-input::placeholder { color: var(--text-muted); }
-
-    #send-btn {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent-glow));
-      color: white;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 2px 12px rgba(74,144,232,0.4);
-    }
-    #send-btn:hover:not(:disabled) {
-      transform: scale(1.08);
-      box-shadow: 0 4px 18px rgba(74,144,232,0.6);
-    }
-    #send-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    #send-btn svg { width: 18px; height: 18px; fill: white; }
-
-    .hint {
-      text-align: center;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 10px;
-      letter-spacing: 0.05em;
-    }
+    /* ── Chat input bar ── */
+    .input-wrapper{position:sticky;bottom:0;background:linear-gradient(to top,var(--bg-deep) 70%,transparent);padding:20px 0 8px;}
+    .input-row{display:flex;gap:12px;align-items:flex-end;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:10px 14px;transition:border-color 0.2s;}
+    .input-row:focus-within{border-color:rgba(74,144,232,0.5);box-shadow:0 0 20px rgba(74,144,232,0.08);}
+    #prompt-input{flex:1;background:transparent;border:none;outline:none;color:var(--text-main);font-family:'Inter',sans-serif;font-size:0.92rem;resize:none;max-height:120px;line-height:1.5;padding:4px 0;}
+    #prompt-input::placeholder{color:var(--text-muted);}
+    #send-btn{width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-glow));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 2px 12px rgba(74,144,232,0.4);}
+    #send-btn:hover:not(:disabled){transform:scale(1.08);box-shadow:0 4px 18px rgba(74,144,232,0.6);}
+    #send-btn:disabled{opacity:0.45;cursor:not-allowed;}
+    #send-btn svg{width:18px;height:18px;fill:#fff;}
+    .hint{text-align:center;font-size:0.73rem;color:var(--text-muted);margin-top:8px;letter-spacing:0.05em;}
 
     /* ── Welcome card ── */
-    .welcome {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 32px;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .welcome h2 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.1rem;
-      color: #a8d0ff;
-      letter-spacing: 0.1em;
-      margin-bottom: 10px;
-    }
-    .welcome p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.7; }
-    .suggestions {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .suggestion-btn {
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--bg-input);
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'Inter', sans-serif;
-    }
-    .suggestion-btn:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: rgba(74,144,232,0.08);
-    }
+    .welcome{background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:28px;text-align:center;}
+    .welcome h2{font-family:'Orbitron',sans-serif;font-size:1rem;color:#a8d0ff;letter-spacing:0.1em;margin-bottom:8px;}
+    .welcome p{color:var(--text-muted);font-size:0.86rem;line-height:1.7;}
+    .suggestions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px;}
+    .suggestion-btn{padding:7px 15px;border-radius:20px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.78rem;cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif;}
+    .suggestion-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(74,144,232,0.08);}
 
     /* ── Error ── */
-    .error-bubble {
-      background: rgba(220, 60, 60, 0.1);
-      border: 1px solid rgba(220, 60, 60, 0.3);
-      color: #ffaaaa;
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 0.88rem;
-    }
+    .error-bubble{background:rgba(220,60,60,0.1);border:1px solid rgba(220,60,60,0.3);color:#ffaaaa;padding:12px 16px;border-radius:12px;font-size:0.87rem;}
+
+    /* ══════════════════════════════
+       IMAGE GENERATOR PANEL
+    ══════════════════════════════ */
+    #gen-panel{gap:24px;}
+
+    .gen-form{background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:16px;}
+    .gen-form label{font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;display:block;}
+
+    #gen-prompt{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:12px;color:var(--text-main);font-family:'Inter',sans-serif;font-size:0.92rem;padding:12px 16px;resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s;}
+    #gen-prompt:focus{border-color:rgba(74,144,232,0.5);}
+    #gen-prompt::placeholder{color:var(--text-muted);}
+
+    /* Style grid */
+    .style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+    .style-chip{padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.8rem;cursor:pointer;transition:all 0.2s;text-align:center;font-family:'Inter',sans-serif;}
+    .style-chip:hover{border-color:var(--accent);color:var(--text-main);}
+    .style-chip.selected{border-color:var(--accent);background:rgba(74,144,232,0.18);color:#a8d0ff;font-weight:500;}
+
+    /* Size selector */
+    .size-row{display:flex;gap:8px;flex-wrap:wrap;}
+    .size-chip{padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted);font-size:0.8rem;cursor:pointer;transition:all 0.2s;font-family:'Inter',sans-serif;}
+    .size-chip.selected{border-color:var(--accent);background:rgba(74,144,232,0.18);color:#a8d0ff;}
+
+    /* Generate button */
+    #gen-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 28px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-glow));color:#fff;font-family:'Orbitron',sans-serif;font-size:0.82rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 18px rgba(74,144,232,0.35);}
+    #gen-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 24px rgba(74,144,232,0.5);}
+    #gen-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    #gen-btn .btn-icon{font-size:1.1rem;}
+
+    /* Results grid */
+    #gen-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+    .gen-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp 0.5s ease both;}
+    .gen-card img{width:100%;display:block;}
+    .gen-card-meta{padding:10px 14px 8px;font-size:0.75rem;color:var(--text-muted);font-style:italic;line-height:1.5;}
+    .gen-card-actions{padding:0 14px 12px;display:flex;gap:8px;}
+
+    /* Loading skeleton */
+    .gen-skeleton{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+    .skeleton-img{height:220px;background:linear-gradient(90deg,var(--bg-input) 25%,rgba(74,144,232,0.08) 50%,var(--bg-input) 75%);background-size:400% 100%;animation:shimmer 1.6s infinite;}
+    @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+    .skeleton-text{margin:12px 14px;height:12px;border-radius:6px;background:var(--bg-input);width:70%;}
 
     /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(74,144,232,0.3); border-radius: 4px; }
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:rgba(74,144,232,0.3);border-radius:4px;}
+
+    @media(max-width:600px){
+      .style-grid{grid-template-columns:repeat(2,1fr);}
+      #gen-results{grid-template-columns:1fr;}
+    }
   </style>
 </head>
 <body>
@@ -328,226 +159,353 @@
     <div class="tagline">Space Image Generator &nbsp;·&nbsp; Powered by AI</div>
   </header>
 
-  <div id="chat-container">
-    <div class="welcome" id="welcome-card">
-      <h2>✦ EXPLORE THE UNIVERSE ✦</h2>
-      <p>Describe any cosmic scene — nebulae, galaxies, black holes, planets, star clusters — and I'll paint it for you.</p>
-      <div class="suggestions">
-        <button class="suggestion-btn" onclick="useSuggestion(this)">🌌 Andromeda galaxy at dawn</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">🪐 Saturn with aurora rings</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">⭐ Nebula birthing new stars</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">🕳️ Black hole event horizon</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">☄️ Comet passing through deep space</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">🌠 Milky Way over alien ocean</button>
+  <!-- ── Tabs ── -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('chat',this)">💬 &nbsp;AI Chat</button>
+    <button class="tab-btn" onclick="switchTab('gen',this)">🎨 &nbsp;Image Generator</button>
+  </div>
+
+  <!-- ═══════════════════════════
+       TAB 1 — CHAT
+  ═══════════════════════════ -->
+  <div class="panel active" id="chat-panel">
+    <div id="chat-container">
+      <div class="welcome" id="welcome-card">
+        <h2>✦ EXPLORE THE UNIVERSE ✦</h2>
+        <p>Describe any cosmic scene and I'll paint it for you. Or just ask me anything about space!</p>
+        <div class="suggestions">
+          <button class="suggestion-btn" onclick="useSuggestion(this)">🌌 Andromeda galaxy at dawn</button>
+          <button class="suggestion-btn" onclick="useSuggestion(this)">🪐 Saturn with aurora rings</button>
+          <button class="suggestion-btn" onclick="useSuggestion(this)">⭐ Nebula birthing new stars</button>
+          <button class="suggestion-btn" onclick="useSuggestion(this)">🕳️ Black hole event horizon</button>
+          <button class="suggestion-btn" onclick="useSuggestion(this)">☄️ Comet passing through deep space</button>
+          <button class="suggestion-btn" onclick="useSuggestion(this)">🌠 Milky Way over alien ocean</button>
+        </div>
       </div>
+    </div>
+
+    <div class="input-wrapper">
+      <div class="input-row">
+        <textarea id="prompt-input" placeholder="Describe a space scene… e.g. 'a glowing nebula with twin suns'" rows="1"></textarea>
+        <button id="send-btn" onclick="sendMessage()" title="Generate">
+          <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+        </button>
+      </div>
+      <div class="hint">Press Enter to send &nbsp;·&nbsp; Shift+Enter for new line</div>
     </div>
   </div>
 
-  <div class="input-wrapper">
-    <div class="input-row">
-      <textarea id="prompt-input" placeholder="Describe a space scene… e.g. 'a glowing nebula with twin suns'" rows="1"></textarea>
-      <button id="send-btn" onclick="sendMessage()" title="Generate">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+  <!-- ═══════════════════════════
+       TAB 2 — IMAGE GENERATOR
+  ═══════════════════════════ -->
+  <div class="panel" id="gen-panel">
+
+    <div class="gen-form">
+      <!-- Prompt -->
+      <div>
+        <label>✦ Describe Your Scene</label>
+        <textarea id="gen-prompt" placeholder="e.g. A massive black hole devouring a star, surrounded by jets of plasma, deep space background…" rows="3"></textarea>
+      </div>
+
+      <!-- Style -->
+      <div>
+        <label>✦ Visual Style</label>
+        <div class="style-grid" id="style-grid">
+          <div class="style-chip selected" data-style="ultra-detailed space photography, Hubble style, photorealistic, 8K">📷 Photorealistic</div>
+          <div class="style-chip" data-style="cinematic space scene, movie still, dramatic lighting, epic scale">🎬 Cinematic</div>
+          <div class="style-chip" data-style="digital painting, concept art, artstation, detailed illustration">🖌️ Concept Art</div>
+          <div class="style-chip" data-style="watercolor painting, soft brushstrokes, ethereal, dreamlike colors">🎨 Watercolor</div>
+          <div class="style-chip" data-style="synthwave neon colors, retrowave, glowing grid, 80s sci-fi aesthetic">🌈 Synthwave</div>
+          <div class="style-chip" data-style="minimalist clean design, geometric shapes, flat art, simple forms">◻ Minimalist</div>
+          <div class="style-chip" data-style="NASA scientific visualization, accurate astronomy, educational render">🔭 NASA Style</div>
+          <div class="style-chip" data-style="oil painting, renaissance brushwork, classical art, museum quality">🏛️ Oil Painting</div>
+        </div>
+      </div>
+
+      <!-- Size -->
+      <div>
+        <label>✦ Image Size</label>
+        <div class="size-row" id="size-row">
+          <div class="size-chip selected" data-w="768" data-h="512">Landscape 3:2</div>
+          <div class="size-chip" data-w="512" data-h="768">Portrait 2:3</div>
+          <div class="size-chip" data-w="640" data-h="640">Square 1:1</div>
+          <div class="size-chip" data-w="1024" data-h="512">Wide 2:1</div>
+        </div>
+      </div>
+
+      <!-- Count -->
+      <div>
+        <label>✦ Number of Images</label>
+        <div class="size-row" id="count-row">
+          <div class="size-chip selected" data-count="1">1</div>
+          <div class="size-chip" data-count="2">2</div>
+          <div class="size-chip" data-count="4">4</div>
+        </div>
+      </div>
+
+      <button id="gen-btn" onclick="generateImages()">
+        <span class="btn-icon">✦</span> GENERATE IMAGES
       </button>
     </div>
-    <div class="hint">Press Enter to send &nbsp;·&nbsp; Shift+Enter for new line</div>
+
+    <div id="gen-results"></div>
   </div>
 </div>
 
 <script>
-  // ── Starfield ──
-  const canvas = document.getElementById('stars-canvas');
-  const ctx = canvas.getContext('2d');
-  let stars = [];
-  function initStars() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    stars = Array.from({ length: 200 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.4 + 0.2,
-      a: Math.random(),
-      da: (Math.random() - 0.5) * 0.005
-    }));
+// ── Starfield ──
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  stars = Array.from({length:200}, () => ({
+    x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+    r: Math.random()*1.4+0.2, a: Math.random(), da: (Math.random()-0.5)*0.005
+  }));
+}
+function drawStars() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s => {
+    s.a = Math.max(0.1, Math.min(1, s.a+s.da));
+    if (s.a<=0.1||s.a>=1) s.da*=-1;
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${s.a})`; ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', initStars);
+initStars(); drawStars();
+
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(name+'-panel').classList.add('active');
+}
+
+// ── Chat logic ──
+const input = document.getElementById('prompt-input');
+input.addEventListener('input', () => {
+  input.style.height='auto';
+  input.style.height=Math.min(input.scrollHeight,120)+'px';
+});
+input.addEventListener('keydown', e => {
+  if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+});
+
+let history = [];
+let chatBusy = false;
+
+function useSuggestion(btn) {
+  input.value = btn.textContent.slice(2).trim();
+  input.dispatchEvent(new Event('input'));
+  sendMessage();
+}
+
+function addMessage(role, content, imageUrl, imagePrompt) {
+  const welcome = document.getElementById('welcome-card');
+  if (welcome) welcome.remove();
+  const container = document.getElementById('chat-container');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${role==='bot'?'bot-av':'user-av'}`;
+  avatar.textContent = role==='bot'?'AI':'YOU';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = content;
+  if (imageUrl) {
+    const card = document.createElement('div');
+    card.className = 'image-card';
+    const img = document.createElement('img');
+    img.src = imageUrl; img.alt = imagePrompt||'Space image';
+    img.className = 'loading-img'; img.loading='lazy';
+    img.onload = () => img.classList.remove('loading-img');
+    const meta = document.createElement('div');
+    meta.className = 'image-meta'; meta.textContent = `✦ ${imagePrompt||'Space image'}`;
+    const actions = document.createElement('div');
+    actions.className = 'image-actions';
+    const dlBtn = document.createElement('button');
+    dlBtn.className='btn-small'; dlBtn.textContent='↓ Download';
+    dlBtn.onclick=()=>{const a=document.createElement('a');a.href=imageUrl;a.download='cosmos.jpg';a.target='_blank';a.click();};
+    const reBtn = document.createElement('button');
+    reBtn.className='btn-small'; reBtn.textContent='↺ Regenerate';
+    reBtn.onclick=()=>{input.value=imagePrompt||'';sendMessage();};
+    actions.appendChild(dlBtn); actions.appendChild(reBtn);
+    card.appendChild(img); card.appendChild(meta); card.appendChild(actions);
+    bubble.appendChild(card);
   }
-  function drawStars() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    stars.forEach(s => {
-      s.a = Math.max(0.1, Math.min(1, s.a + s.da));
-      if (s.a <= 0.1 || s.a >= 1) s.da *= -1;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${s.a})`;
-      ctx.fill();
+  if (role==='bot'){div.appendChild(avatar);div.appendChild(bubble);}
+  else{div.appendChild(bubble);div.appendChild(avatar);}
+  container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+}
+
+function addTyping() {
+  const container = document.getElementById('chat-container');
+  const div=document.createElement('div'); div.className='message bot'; div.id='typing-indicator';
+  const av=document.createElement('div'); av.className='avatar bot-av'; av.textContent='AI';
+  const b=document.createElement('div'); b.className='bubble typing-bubble';
+  b.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  div.appendChild(av); div.appendChild(b); container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('typing-indicator');if(t)t.remove();}
+function addError(msg){
+  const container=document.getElementById('chat-container');
+  const div=document.createElement('div');div.className='message bot';
+  const av=document.createElement('div');av.className='avatar bot-av';av.textContent='AI';
+  const b=document.createElement('div');b.className='bubble';
+  b.innerHTML=`<div class="error-bubble">⚠️ ${msg}</div>`;
+  div.appendChild(av);div.appendChild(b);container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+}
+
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text || chatBusy) return;
+  chatBusy=true;
+  document.getElementById('send-btn').disabled=true;
+  addMessage('user', text);
+  input.value=''; input.style.height='auto';
+  history.push({role:'user', content:text});
+  addTyping();
+  try {
+    const res = await fetch('/api/chat', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({message:text, history})
     });
-    requestAnimationFrame(drawStars);
+    const data = await res.json();
+    removeTyping();
+    if (!res.ok) throw new Error(data.error||'Server error');
+    addMessage('bot', data.text, data.imageUrl, data.imagePrompt);
+    history.push({role:'assistant', content:data.text});
+  } catch(err) {
+    removeTyping();
+    addError(err.message||'Something went wrong. Please try again.');
+  } finally {
+    chatBusy=false;
+    document.getElementById('send-btn').disabled=false;
   }
-  window.addEventListener('resize', initStars);
-  initStars(); drawStars();
+}
 
-  // ── Auto-resize textarea ──
-  const input = document.getElementById('prompt-input');
-  input.addEventListener('input', () => {
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+// ══════════════════════════════
+// IMAGE GENERATOR PANEL LOGIC
+// ══════════════════════════════
+
+// Chip selectors
+function initChips(selector, single=true) {
+  document.querySelectorAll(selector).forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (single) document.querySelectorAll(selector).forEach(c=>c.classList.remove('selected'));
+      chip.classList.toggle('selected');
+      if (single) chip.classList.add('selected');
+    });
   });
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+initChips('#style-grid .style-chip', true);
+initChips('#size-row .size-chip', true);
+initChips('#count-row .size-chip', true);
+
+function getSelected(selector, attr) {
+  const el = document.querySelector(`${selector}.selected`);
+  return el ? el.getAttribute(attr) : null;
+}
+
+let genBusy = false;
+
+async function generateImages() {
+  if (genBusy) return;
+  const promptText = document.getElementById('gen-prompt').value.trim();
+  if (!promptText) {
+    alert('Please describe your space scene first!');
+    return;
+  }
+
+  const styleEl = document.querySelector('#style-grid .style-chip.selected');
+  const style = styleEl ? styleEl.getAttribute('data-style') : 'ultra-detailed space photography, 8K, photorealistic';
+
+  const sizeEl = document.querySelector('#size-row .size-chip.selected');
+  const w = sizeEl ? parseInt(sizeEl.getAttribute('data-w')) : 768;
+  const h = sizeEl ? parseInt(sizeEl.getAttribute('data-h')) : 512;
+
+  const countEl = document.querySelector('#count-row .size-chip.selected');
+  const count = countEl ? parseInt(countEl.getAttribute('data-count')) : 1;
+
+  genBusy = true;
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-icon">⏳</span> GENERATING…';
+
+  const results = document.getElementById('gen-results');
+  results.innerHTML = '';
+
+  // Show skeletons
+  for (let i = 0; i < count; i++) {
+    const sk = document.createElement('div');
+    sk.className='gen-skeleton'; sk.id=`skel-${i}`;
+    sk.innerHTML='<div class="skeleton-img"></div><div class="skeleton-text"></div>';
+    results.appendChild(sk);
+  }
+
+  // Build full prompt for each image
+  const fullPrompt = `${promptText}, ${style}`;
+
+  const promises = Array.from({length: count}, (_, i) => {
+    const seed = Math.floor(Math.random() * 999999);
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`;
+    return {url, seed, index: i};
   });
 
-  // ── Chat state ──
-  let history = [];
-  let isLoading = false;
+  for (const {url, seed, index} of promises) {
+    const skel = document.getElementById(`skel-${index}`);
 
-  function useSuggestion(btn) {
-    input.value = btn.textContent.slice(2).trim();
-    input.dispatchEvent(new Event('input'));
-    sendMessage();
+    const card = document.createElement('div');
+    card.className = 'gen-card';
+
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = promptText;
+    img.style.minHeight = '200px';
+
+    img.onload = () => { img.style.minHeight=''; };
+    img.onerror = () => {
+      img.src=''; img.style.display='none';
+      const err=document.createElement('div');
+      err.style.cssText='padding:20px;color:#ff8888;font-size:0.85rem;';
+      err.textContent='⚠️ Image failed to load. Try again.';
+      card.insertBefore(err, card.firstChild);
+    };
+
+    const meta = document.createElement('div');
+    meta.className='gen-card-meta';
+    meta.textContent = `✦ ${promptText.length>80?promptText.slice(0,80)+'…':promptText}`;
+
+    const actions = document.createElement('div');
+    actions.className='gen-card-actions';
+
+    const dlBtn=document.createElement('button');
+    dlBtn.className='btn-small'; dlBtn.textContent='↓ Download';
+    dlBtn.onclick=()=>{const a=document.createElement('a');a.href=url;a.download=`cosmos-${seed}.jpg`;a.target='_blank';a.click();};
+
+    const cpBtn=document.createElement('button');
+    cpBtn.className='btn-small'; cpBtn.textContent='🔗 Copy URL';
+    cpBtn.onclick=()=>{navigator.clipboard.writeText(url).then(()=>{cpBtn.textContent='✓ Copied!';setTimeout(()=>cpBtn.textContent='🔗 Copy URL',2000);});};
+
+    actions.appendChild(dlBtn); actions.appendChild(cpBtn);
+    card.appendChild(img); card.appendChild(meta); card.appendChild(actions);
+
+    if (skel) skel.replaceWith(card);
+    else results.appendChild(card);
   }
 
-  function addMessage(role, content, imageUrl, imagePrompt) {
-    const welcome = document.getElementById('welcome-card');
-    if (welcome) welcome.remove();
-
-    const container = document.getElementById('chat-container');
-    const div = document.createElement('div');
-    div.className = `message ${role}`;
-
-    const avatar = document.createElement('div');
-    avatar.className = `avatar ${role === 'bot' ? 'bot-av' : 'user-av'}`;
-    avatar.textContent = role === 'bot' ? 'AI' : 'YOU';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.textContent = content;
-
-    if (imageUrl) {
-      const card = document.createElement('div');
-      card.className = 'image-card';
-
-      const img = document.createElement('img');
-      img.src = imageUrl;
-      img.alt = imagePrompt || 'Generated space image';
-      img.loading = 'lazy';
-      img.onerror = () => { img.src = ''; img.style.display='none'; };
-
-      const meta = document.createElement('div');
-      meta.className = 'image-meta';
-      meta.textContent = `✦ ${imagePrompt || 'Space image'}`;
-
-      const actions = document.createElement('div');
-      actions.className = 'image-actions';
-
-      const dlBtn = document.createElement('button');
-      dlBtn.className = 'btn-small';
-      dlBtn.textContent = '↓ Download';
-      dlBtn.onclick = () => {
-        const a = document.createElement('a');
-        a.href = imageUrl; a.download = 'cosmos.jpg';
-        a.target = '_blank'; a.click();
-      };
-
-      const newBtn = document.createElement('button');
-      newBtn.className = 'btn-small';
-      newBtn.textContent = '↺ Regenerate';
-      newBtn.onclick = () => { input.value = imagePrompt || ''; sendMessage(); };
-
-      actions.appendChild(dlBtn);
-      actions.appendChild(newBtn);
-      card.appendChild(img);
-      card.appendChild(meta);
-      card.appendChild(actions);
-      bubble.appendChild(card);
-    }
-
-    if (role === 'bot') {
-      div.appendChild(avatar);
-      div.appendChild(bubble);
-    } else {
-      div.appendChild(bubble);
-      div.appendChild(avatar);
-    }
-
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function addTyping() {
-    const container = document.getElementById('chat-container');
-    const div = document.createElement('div');
-    div.className = 'message bot';
-    div.id = 'typing-indicator';
-
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar bot-av';
-    avatar.textContent = 'AI';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble typing-bubble';
-    bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-
-    div.appendChild(avatar);
-    div.appendChild(bubble);
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function removeTyping() {
-    const t = document.getElementById('typing-indicator');
-    if (t) t.remove();
-  }
-
-  function addError(msg) {
-    const container = document.getElementById('chat-container');
-    const div = document.createElement('div');
-    div.className = 'message bot';
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar bot-av';
-    avatar.textContent = 'AI';
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.innerHTML = `<div class="error-bubble">⚠️ ${msg}</div>`;
-    div.appendChild(avatar);
-    div.appendChild(bubble);
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-  }
-
-  async function sendMessage() {
-    const text = input.value.trim();
-    if (!text || isLoading) return;
-
-    isLoading = true;
-    document.getElementById('send-btn').disabled = true;
-    addMessage('user', text);
-    input.value = '';
-    input.style.height = 'auto';
-
-    history.push({ role: 'user', content: text });
-    addTyping();
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history })
-      });
-
-      const data = await res.json();
-      removeTyping();
-
-      if (!res.ok) throw new Error(data.error || 'Server error');
-
-      addMessage('bot', data.text, data.imageUrl, data.imagePrompt);
-      history.push({ role: 'assistant', content: data.text });
-    } catch (err) {
-      removeTyping();
-      addError(err.message || 'Something went wrong. Please try again.');
-    } finally {
-      isLoading = false;
-      document.getElementById('send-btn').disabled = false;
-    }
-  }
+  genBusy = false;
+  btn.disabled = false;
+  btn.innerHTML = '<span class="btn-icon">✦</span> GENERATE IMAGES';
+}
 </script>
 </body>
 </html>
